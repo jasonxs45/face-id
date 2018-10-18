@@ -1,29 +1,76 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link
+        v-for="(item, index) in menus"
+        :key="'menu-'+index"
+        :to="item.path"
+        class="nav-item"
+        :exact="item.path !== '/home'"
+      >{{item.text}}</router-link>
     </div>
-    <router-view/>
+    <div class="content">
+      <router-view/>
+    </div>
   </div>
 </template>
-
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
+<script>
+export default {
+  name: 'App',
+  data () {
+    return {
+      menus: [
+        {
+          text: '近日来访',
+          path: '/home'
+        },
+        {
+          text: '客户管理',
+          path: '/manage'
+        },
+        {
+          text: '来访统计',
+          path: '/statistic'
+        }
+      ]
     }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+#app{
+  font-size: p2r(30);
+  #nav{
+    position: fixed;
+    width: 100%;
+    left:0;
+    bottom: 0;
+    height: p2r(100);
+    z-index: 10;
+    font-size: 0;
+    .nav-item{
+      display: inline-block;
+      width: 33.333%;
+      text-align: center;
+      font-size: p2r(30);
+      vertical-align: top;
+      line-height: p2r(100);
+      transition: all .3s;
+      &.router-link-active{
+        background: #2c8ebb;
+        color: #fff;
+      }
+    }
+    & + .content{
+      padding-bottom: p2r(100);
+    }
+  }
+  .content{
+    height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 }
 </style>
