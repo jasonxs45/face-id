@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "vant": "^1.3.8",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
@@ -18,7 +19,9 @@
     "@vue/cli-plugin-eslint": "^3.0.4",
     "@vue/cli-service": "^3.0.4",
     "@vue/eslint-config-standard": "^3.0.5",
+    "babel-plugin-import": "^1.10.0",
     "node-sass": "^4.9.0",
+    "postcss-adaptive": "^0.5.0",
     "sass-loader": "^7.0.1",
     "vue-template-compiler": "^2.5.17"
   }

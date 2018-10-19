@@ -6,6 +6,8 @@ function resolve (dir) {
 module.exports = {
   css: {
     loaderOptions: {
+      postcss: {
+      },
       sass: {
         data: '@import "~common/scss/variables.scss";@import "~common/scss/mixins.scss";'
       }

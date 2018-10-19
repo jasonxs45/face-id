@@ -1,10 +1,7 @@
-@import "~common/scss/variables.scss";
-@import "~common/scss/mixins.scss";
 .layui-m-layer {
   position: relative;
-  z-index: 99999
+  z-index: 19891014
 }
-
 .layui-m-layer * {
   -webkit-box-sizing: content-box;
   -moz-box-sizing: content-box;
@@ -26,61 +23,96 @@
 
 .layui-m-layermain {
   display: table;
-  font-family: Helvetica, arial, sans-serif;
-  pointer-events: none;
-  .layui-m-layersection {
-    display: table-cell;
-    vertical-align: middle;
-    text-align: center
-  }
+  pointer-events: none
+}
+
+.layui-m-layermain .layui-m-layersection {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center
 }
 
 .layui-m-layerchild {
   position: relative;
   display: inline-block;
   text-align: left;
-  background: #fff;
+  background-color: #fff;
   font-size: 14px;
   border-radius: 5px;
   box-shadow: 0 0 8px rgba(0, 0, 0, .1);
   pointer-events: auto;
   -webkit-overflow-scrolling: touch;
+  -webkit-animation-fill-mode: both;
   animation-fill-mode: both;
+  -webkit-animation-duration: .2s;
   animation-duration: .2s
+}
+
+@-webkit-keyframes layui-m-anim-scale {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale(.5);
+    transform: scale(.5)
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+    transform: scale(1)
+  }
 }
 
 @keyframes layui-m-anim-scale {
   0% {
     opacity: 0;
+    -webkit-transform: scale(.5);
     transform: scale(.5)
   }
   100% {
     opacity: 1;
+    -webkit-transform: scale(1);
     transform: scale(1)
   }
 }
 
 .layui-m-anim-scale {
   animation-name: layui-m-anim-scale;
+  -webkit-animation-name: layui-m-anim-scale
 }
-@keyframes layui-m-anim-up {
+
+@-webkit-keyframes layui-m-anim-up {
   0% {
     opacity: 0;
+    -webkit-transform: translateY(800px);
     transform: translateY(800px)
   }
   100% {
     opacity: 1;
+    -webkit-transform: translateY(0);
+    transform: translateY(0)
+  }
+}
+
+@keyframes layui-m-anim-up {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(800px);
+    transform: translateY(800px)
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
     transform: translateY(0)
   }
 }
 
 .layui-m-anim-up {
+  -webkit-animation-name: layui-m-anim-up;
   animation-name: layui-m-anim-up
 }
 
 .layui-m-layer0 .layui-m-layerchild {
   width: 90%;
-  max-width: p2r(640);
+  max-width: 640px
 }
 
 .layui-m-layer1 .layui-m-layerchild {
@@ -105,14 +137,7 @@
   font-size: 16px;
   font-weight: 400;
   border-radius: 5px 5px 0 0;
-  text-align: center;
-  padding-top: p2r(160);
-  color:$primary-color;
-  font-weight: 500;
-  & + .layui-m-layercont{
-    padding-top: p2r(40);
-    min-height: p2r(100);
-  }
+  text-align: center
 }
 
 .layui-m-layerbtn span, .layui-m-layerchild h3 {
@@ -122,12 +147,9 @@
 }
 
 .layui-m-layercont {
-  box-sizing: border-box;
-  padding: p2r(220) p2r(30) p2r(30);
-  min-height: p2r(380);
+  padding: 40px 30px;
   line-height: 22px;
-  text-align: center;
-  font-size: p2r(26);
+  text-align: center
 }
 
 .layui-m-layer1 .layui-m-layercont {
@@ -148,7 +170,9 @@
   display: inline-block;
   background-color: #fff;
   border-radius: 100%;
+  -webkit-animation: layui-m-anim-loading 1.4s infinite ease-in-out;
   animation: layui-m-anim-loading 1.4s infinite ease-in-out;
+  -webkit-animation-fill-mode: both;
   animation-fill-mode: both
 }
 
@@ -162,21 +186,36 @@
   margin-top: 20px
 }
 
-@keyframes layui-m-anim-loading {
+@-webkit-keyframes layui-m-anim-loading {
   0%, 100%, 80% {
     transform: scale(0);
+    -webkit-transform: scale(0)
   }
   40% {
     transform: scale(1);
+    -webkit-transform: scale(1)
+  }
+}
+
+@keyframes layui-m-anim-loading {
+  0%, 100%, 80% {
+    transform: scale(0);
+    -webkit-transform: scale(0)
+  }
+  40% {
+    transform: scale(1);
+    -webkit-transform: scale(1)
   }
 }
 
 .layui-m-layer2 .layui-m-layercont i:first-child {
   margin-left: 0;
+  -webkit-animation-delay: -.32s;
   animation-delay: -.32s
 }
 
 .layui-m-layer2 .layui-m-layercont i.layui-m-layerload {
+  -webkit-animation-delay: -.16s;
   animation-delay: -.16s
 }
 
@@ -188,31 +227,28 @@
 }
 
 .layui-m-layerbtn {
-  display: flex;
+  display: box;
+  display: -moz-box;
+  display: -webkit-box;
   width: 100%;
   height: 50px;
   line-height: 50px;
   font-size: 0;
-  position: relative;
-  &:before{
-    content: '';
-    display: block;
-    border-top:1px solid #ddd;
-    position: absolute;
-    width:88%;
-    left:6%;
-  }
+  border-top: 1px solid #D0D0D0;
+  background-color: #F2F2F2
 }
 
 .layui-m-layerbtn span {
   display: block;
-  flex:1;
+  -moz-box-flex: 1;
+  box-flex: 1;
+  -webkit-box-flex: 1;
   font-size: 14px;
   cursor: pointer
 }
 
 .layui-m-layerbtn span[yes] {
-  color:$text-color;
+  color: #40AFFE
 }
 
 .layui-m-layerbtn span[no] {
@@ -247,11 +283,13 @@
   height: 1px;
   background-color: #999;
   transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
   border-radius: 3px
 }
 
 .layui-m-layerend::after {
   transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg)
 }
 
 body .layui-m-layer .layui-m-layer-footer {
@@ -291,4 +329,17 @@ body .layui-m-layer .layui-m-layer-footer {
 .layui-m-layer-footer .layui-m-layerbtn span[yes] {
   margin-top: 10px;
   border-radius: 5px
+}
+
+body .layui-m-layer .layui-m-layer-msg {
+  width: auto;
+  max-width: 90%;
+  margin: 0 auto;
+  bottom: -150px;
+  background-color: rgba(0, 0, 0, .7);
+  color: #fff
+}
+
+.layui-m-layer-msg .layui-m-layercont {
+  padding: 10px 20px
 }

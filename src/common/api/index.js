@@ -1,7 +1,7 @@
 import axios from 'axios'
 import qs from 'qs'
 const BASE_URL = '/Mobile-PostAPI'
-const MOCK_URL = 'https://www.easy-mock.com/mock/5abd9851597f2f6d4d73ae18/mock/'
+const MOCK_URL = 'https://www.easy-mock.com/mock/5bc99756a53e086f8af484c2/faceid'
 axios.defaults.retry = 4
 axios.defaults.retryDelay = 1000
 axios.interceptors.request.use(function (config) {
@@ -31,7 +31,7 @@ let api = {
   // 模拟数据
   mock (opt) {
     return axios.post(
-      MOCK_URL + opt.Act,
+      MOCK_URL + opt,
       qs.stringify(opt)
     )
   },
@@ -44,20 +44,10 @@ let api = {
   // 全局查询方法
   globalQuery (opt) {
     // Object.assign(opt, { openid })
-    let index = window.$loading('加载中')
     return axios.post(
       BASE_URL,
       qs.stringify(opt)
-    ).then(res => {
-      return new Promise((resolve, reject) => {
-        if (res.status === 200) {
-          window.$close(index)
-          resolve(res)
-        } else {
-          reject(res)
-        }
-      })
-    })
+    )
   },
   // 公用请求
   // 获取微信昵称头像等

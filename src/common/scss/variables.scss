@@ -118,6 +118,9 @@ $psd-width-nor          : 750;
 @function p2r($pxs){
   @return $pxs / $psd-width-nor * $psd-width-base / $font-size-boot / 2 +rem
 };
+@function rpx($pxs){
+  @return $pxs / 2 + px
+};
 
 // header
 $header-height          :p2r(90);
