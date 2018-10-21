@@ -18,10 +18,9 @@
   </div>
 </template>
 <script>
-import api from 'common/api'
-import Vue from 'vue'
+// import Vue from 'vue'
 import { Icon } from 'vant'
-Vue.use(Icon)
+// Vue.use(Icon)
 export default {
   name: 'App',
   components: {
@@ -49,9 +48,6 @@ export default {
     }
   },
   mounted () {
-    api.mock('/facelist').then(res => {
-      console.log(res)
-    })
     // this.$toast.loading({
     //   duration: 0,
     //   message: '提示',
@@ -72,6 +68,7 @@ export default {
     height: rpx(100);
     z-index: 10;
     font-size: 0;
+    background: #fff;
     box-shadow: 0 0 2px 0 rgba(0,0,0,.2);
     .nav-item{
       display: inline-block;

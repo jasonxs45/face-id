@@ -10,7 +10,7 @@
       >{{item.text}}<span v-show="item.todos.length > 0" class="badge">{{item.todos.length}}</span>
       </router-link>
     </div>
-    <div class="">
+    <div class="content">
       <router-view/>
     </div>
   </div>
@@ -38,10 +38,19 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.home{
+  .content{
+    padding-top: rpx(90);
+  }
+}
 .tabs{
+  position: fixed;
+  width: 100%;
   font-size: 0;
   height: rpx(90);
   box-shadow: 0 0 2px 0 rgba(0,0,0,.3);
+  background: #fff;
+  z-index: 10;
   .tab-item{
     display: inline-block;
     width: 50%;
