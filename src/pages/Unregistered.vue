@@ -1,94 +1,204 @@
 <template>
   <div class="unregistered">
-    <div v-if="list.length > 0" v-for="(item, index) in list" :key="'item-'+index" class="item van-hairline--bottom">
-      <row type="flex" justify="space-between" align="center">
-        <img :src="item.avatar" class="avatar" alt="">
-        <div class="guest-info">
-          <p class="guest-time">{{item.date}}</p>
+    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+      <van-list v-model="loading" :finished="finished" @load="onLoad">
+        <div v-if="list.length > 0" v-for="(item, index) in list" :key="'item-'+index" class="item van-hairline--bottom">
+          <van-row type="flex" justify="space-between" align="center">
+            <img v-lazy="item.ImgUrl" :src="item.ImgUrl" class="avatar" alt="">
+            <div class="guest-info">
+              <p class="guest-time">时间：{{item.LoginTime|fmt}}</p>
+            </div>
+            <div class="operate-box">
+              <van-icon class="icon" name="add-o" @click="showBox(index)"></van-icon>
+            </div>
+          </van-row>
         </div>
-        <div class="operate-box">
-          <icon class="icon" name="add-o" @click="showBox"></icon>
-        </div>
-      </row>
-    </div>
-    <popup v-model="show" position="right">
+      </van-list>
+    </van-pull-refresh>
+    <van-popup v-model="show" :overlay="false" position="bottom">
       <div class="form-wrapper">
-        <h3 class="title">注册客户</h3>
         <div class="form-container">
-          <img class="avatar" v-if="list.length > 0" :src="list[0].avatar" alt="">
-          <row class="row van-hairline--bottom">
-            <Field
+          <h3 class="title">注册客户</h3>
+          <img class="avatar" v-if="list.length > 0" :src="role.avatar" alt="">
+          <van-row class="row van-hairline--bottom">
+            <van-field
               v-model="name"
               required
               clearable
+              :error="nameCheck"
               placeholder="请输入姓名"
               class="name"
-            />
-            <radio-group v-model="gander" class="radio-group">
-              <radio class="radio" name="男">男</radio>
-              <radio class="radio" name="女">女</radio>
-            </radio-group>
-          </row>
-          <row class="row van-hairline--bottom">
-            <Field
+            ></van-field>
+            <van-radio-group v-model="gander" class="radio-group">
+              <van-radio class="radio" name="男">男</van-radio>
+              <van-radio class="radio" name="女">女</van-radio>
+            </van-radio-group>
+          </van-row>
+          <van-row class="row van-hairline--bottom">
+            <van-field
               v-model="tel"
               required
               clearable
+              :error="telCheck"
               placeholder="请输入手机号码"
               type="tel"
-            />
-          </row>
-          <row class="row">
+            ></van-field>
+          </van-row>
+          <van-row class="row">
             <label v-for="(item, index) in types" :key="'type-'+index" class="x-radio">
-              <input class="input" type="radio" name="type" :value="item">
-              <span class="text">{{item}}</span>
+              <input v-model="type" class="input" type="radio" name="type" :value="item.val">
+              <span class="text">{{item.desc}}</span>
             </label>
-          </row>
+          </van-row>
         </div>
-        <Button type="primary" size="large" class="submit">注册</Button>
+        <div class="btns">
+          <van-button :disabled="submiting" type="primary" size="large" class="submit" @click="submit">注册</van-button>
+          <van-button type="primary" plain size="large" @click="hideBox" class="back">返回</van-button>
+        </div>
       </div>
-    </popup>
+    </van-popup>
   </div>
 </template>
 <script>
 import api from 'common/api'
-// import Vue from 'vue'
-import { Row, CellGroup, Icon, Popup, Field, Button, Radio, RadioGroup } from 'vant'
-// Vue.use(Row).use(Icon).use(Popup).use(VanButton)
+import { formatDate } from 'common/utils/date'
+import { NAME_REG, TEL_REG } from 'common/utils/reg'
+import Vue from 'vue'
+import { mapState, mapMutations, mapActions } from 'vuex'
+import { PullRefresh, List, Row, Icon, Popup, Field, Button, Radio, RadioGroup, Lazyload } from 'vant'
+Vue.use(PullRefresh).use(List).use(Row).use(Icon).use(Popup).use(Button).use(Radio).use(RadioGroup).use(Field).use(Lazyload)
 export default {
   name: 'Unregistered',
-  components: {
-    Row,
-    CellGroup,
-    Icon,
-    Popup,
-    Field,
-    Button,
-    Radio,
-    RadioGroup
-  },
   data () {
     return {
-      list: [],
+      refreshing: false,
+      loading: false,
+      totalCount: 0,
       show: false,
+      role: {
+        avatar: '',
+        guid: '',
+        id: ''
+      },
       name: '',
       gander: '',
       tel: '',
-      types: ['客户', '员工', '供应商', '黑名单', '其他']
+      type: '',
+      submiting: false,
+      types: [
+        { desc: '员工', val: 1 },
+        { desc: '客户', val: 2 }
+      ]
+      // types: ['客户', '员工', '供应商', '黑名单', '其他']
+    }
+  },
+  computed: {
+    ...mapState('unregistered', [
+      'list',
+      'pageIndex'
+    ]),
+    finished () {
+      return Boolean(this.totalCount) && (this.list.length >= this.totalCount)
+    },
+    nameCheck () {
+      return !this.name.match(NAME_REG)
+    },
+    telCheck () {
+      return !this.tel.match(TEL_REG)
+    }
+  },
+  filters: {
+    fmt (str) {
+      let date = new Date(str)
+      return formatDate(date, 'yyyy-MM-dd hh:mm:ss')
+    }
+  },
+  methods: {
+    showBox (index) {
+      this.show = true
+      this.role.avatar = this.list[index].ImgUrl
+      this.role.guid = this.list[index].Guid
+      this.role.id = this.list[index].ID
+    },
+    hideBox () {
+      this.show = false
+    },
+    submit () {
+      if (this.nameCheck) {
+        this.$toast('请输入正确格式的姓名')
+        return
+      }
+      if (!this.gander) {
+        this.$toast('请选择性别')
+        return
+      }
+      if (this.telCheck) {
+        this.$toast('请输入正确格式的手机号码')
+        return
+      }
+      if (!this.type) {
+        this.$toast('请选择访客类型')
+        return
+      }
+      this.submiting = true
+      this.$toast.loading({
+        mask: true,
+        message: '提交中',
+        duration: 0
+      })
+      api.fetch({
+        guid: this.role.guid,
+        id: this.role.id,
+        work: 'addpeople',
+        name: this.name,
+        sex: this.gander,
+        mobile: this.tel,
+        type: this.type
+      }).then(res => {
+        this.submiting = false
+        this.$toast.success('提交成功')
+      }).catch(err => {
+        console.log(err)
+        this.$toast.clear()
+        this.$toast('网络错误，请稍后重试')
+      })
+    },
+    ...mapMutations('unregistered', [
+      'resetList',
+      'concatList',
+      'setPageIndex'
+    ]),
+    ...mapActions('unregistered', [
+      'load'
+    ]),
+    onLoad () {
+      this.load().then(res => {
+        this.loading = false
+        if (res.data.Success) {
+          this.totalCount = res.data.count
+          this.concatList(res.data.data)
+          if (!this.finished) {
+            this.setPageIndex()
+          }
+        }
+      })
+    },
+    onRefresh () {
+      this.setPageIndex('reset')
+      this.load().then(res => {
+        this.refreshing = false
+        if (res.data.Success) {
+          this.resetList(res.data.data)
+          if (!this.finished) {
+            this.setPageIndex()
+          }
+        }
+      })
     }
   },
   created () {
-    this.fetchList()
-  },
-  methods: {
-    fetchList () {
-      api.mock('/minelist').then(res => {
-        this.list = res.data.List
-      })
-    },
-    showBox () {
-      this.show = true
-    }
+    // this.fetchList()
+    // this.concatList()
   }
 }
 </script>
@@ -120,13 +230,16 @@ export default {
   }
 }
 .form-wrapper{
-  width: 92vw;
+  width: 100%;
   height: 100vh;
-  padding: rpx(30);
+  padding: rpx(30) rpx(30) rpx(320);
   background: #fff;
   position: relative;
   .form-container{
-    margin-top: rpx(60);
+    padding-top: rpx(30);
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
     .avatar{
       width: rpx(200);
       height: rpx(200);
@@ -180,11 +293,17 @@ export default {
       }
     }
   }
-  .submit{
+  .btns{
     position: absolute;
     width: 90%;
-    bottom: rpx(60);
+    bottom: 0;
     left: 5%;
+    background: #fff;
+    padding: rpx(30) 0;
+    .submit,
+    .back{
+      margin: rpx(15) auto;
+    }
   }
   .title{
     font-size: rpx(36);

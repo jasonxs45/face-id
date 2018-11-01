@@ -7,7 +7,8 @@
         :key="'tab-'+index"
         :to="item.path"
         class="tab-item"
-      >{{item.text}}<span v-show="item.todos.length > 0" class="badge">{{item.todos.length}}</span>
+      >{{item.text}}
+      <!-- <span v-show="item.todos.length > 0" class="badge">{{item.todos.length}}</span> -->
       </router-link>
     </div>
     <div class="content">

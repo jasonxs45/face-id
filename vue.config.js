@@ -4,6 +4,14 @@ function resolve (dir) {
   return path.join(__dirname, dir)
 }
 module.exports = {
+  devServer: {
+    proxy: {
+      '/WebServer/FaceInterface.aspx': {
+        target: 'http://demo1.1juke.cn',
+        changeOrigin: true
+      }
+    }
+  },
   css: {
     loaderOptions: {
       postcss: {

@@ -8,7 +8,7 @@
         class="nav-item"
         :exact="item.path !== '/home'"
       >
-        <Icon :name="item.icon"/>
+        <van-icon :name="item.icon"></van-icon>
         <p class="text">{{item.text}}</p>
       </router-link>
     </div>
@@ -18,14 +18,11 @@
   </div>
 </template>
 <script>
-// import Vue from 'vue'
+import Vue from 'vue'
 import { Icon } from 'vant'
-// Vue.use(Icon)
+Vue.use(Icon)
 export default {
   name: 'App',
-  components: {
-    Icon
-  },
   data () {
     return {
       menus: [

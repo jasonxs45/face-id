@@ -1,49 +1,86 @@
 <template>
   <div class="mine">
-    <div v-if="list.length > 0" v-for="(item, index) in list" :key="'item-'+index" class="item van-hairline--bottom">
-      <row type="flex" justify="space-between">
-        <img :src="item.avatar" class="avatar" alt="">
-        <div class="guest-info">
-          <p class="guest-name">
-            <span class="name">{{item.name}}先生</span>
-            <tag :type="item.state? 'danger' : 'success'" class="tag">{{item.state? '未跟进' : '跟进中'}}</tag>
-          </p>
-          <a class="guest-tel" :href="'tel:'+item.tel">{{item.tel}}</a>
-          <p class="guest-time">{{item.date}}</p>
+    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+      <van-list v-model="loading" :finished="finished" @load="onLoad">
+        <div v-if="list.length > 0" v-for="(item, index) in list" :key="'item-'+index" class="item van-hairline--bottom">
+          <van-row type="flex" justify="space-between">
+            <img v-lazy="item.ImgUrl" :src="item.ImgUrl" class="avatar" alt="">
+            <div class="guest-info">
+              <p class="guest-name">
+                <span class="name">{{item.Name}}</span>
+                <van-tag :type="item.state? 'danger' : 'success'" class="tag">{{item.state? '未跟进' : '跟进中'}}</van-tag>
+              </p>
+              <a class="guest-tel" :href="'tel:'+item.Mobile">{{item.Mobile}}</a>
+              <p class="guest-time">{{item.date}}</p>
+            </div>
+            <div class="operate-box">
+              <van-icon class="icon" name="add-o"></van-icon>
+              <a class="text">来访记录</a>
+            </div>
+          </van-row>
         </div>
-        <div class="operate-box">
-          <icon class="icon" name="add-o"></icon>
-          <a class="text">来访记录</a>
-        </div>
-      </row>
-    </div>
+      </van-list>
+    </van-pull-refresh>
   </div>
 </template>
 <script>
-// import Vue from 'vue'
-import { Row, Icon, Tag } from 'vant'
-import api from 'common/api'
-// Vue.use(Row).use(Icon).use(Tag)
-
+// import api from 'common/api'
+import Vue from 'vue'
+import { mapState, mapMutations, mapActions } from 'vuex'
+import { PullRefresh, List, Row, Icon, Tag } from 'vant'
+Vue.use(PullRefresh).use(List).use(Row).use(Icon).use(Tag)
 export default {
   name: 'Mine',
-  components: {
-    Row,
-    Icon,
-    Tag
-  },
   data () {
     return {
-      list: []
+      refreshing: false,
+      loading: false,
+      totalCount: 0
+    }
+  },
+  computed: {
+    ...mapState('mine', [
+      'list',
+      'pageIndex'
+    ]),
+    finished () {
+      return Boolean(this.totalCount) && (this.list.length >= this.totalCount)
     }
   },
   created () {
-    this.fetchList()
+    // this.fetchList()
   },
   methods: {
-    fetchList () {
-      api.mock('/minelist').then(res => {
-        this.list = res.data.List
+    ...mapMutations('mine', [
+      'resetList',
+      'concatList',
+      'setPageIndex'
+    ]),
+    ...mapActions('mine', [
+      'load'
+    ]),
+    onLoad () {
+      this.load().then(res => {
+        this.loading = false
+        if (res.data.Success) {
+          this.totalCount = res.data.count
+          this.concatList(res.data.data)
+          if (!this.finished) {
+            this.setPageIndex()
+          }
+        }
+      })
+    },
+    onRefresh () {
+      this.setPageIndex('reset')
+      this.load().then(res => {
+        this.refreshing = false
+        if (res.data.Success) {
+          this.resetList(res.data.data)
+          if (!this.finished) {
+            this.setPageIndex()
+          }
+        }
       })
     }
   }

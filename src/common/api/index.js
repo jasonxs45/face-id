@@ -1,6 +1,6 @@
 import axios from 'axios'
 import qs from 'qs'
-const BASE_URL = '/Mobile-PostAPI'
+const BASE_URL = '/WebServer/FaceInterface.aspx'
 const MOCK_URL = 'https://www.easy-mock.com/mock/5bc99756a53e086f8af484c2/faceid'
 axios.defaults.retry = 4
 axios.defaults.retryDelay = 1000
@@ -42,7 +42,7 @@ let api = {
     })
   },
   // 全局查询方法
-  globalQuery (opt) {
+  fetch (opt) {
     // Object.assign(opt, { openid })
     return axios.post(
       BASE_URL,
