@@ -150,13 +150,18 @@ export default {
         guid: this.role.guid,
         id: this.role.id,
         work: 'addpeople',
+        imgurl: this.role.avatar,
         name: this.name,
         sex: this.gander,
         mobile: this.tel,
         type: this.type
       }).then(res => {
         this.submiting = false
-        this.$toast.success('提交成功')
+        if (res.data.Success) {
+          this.$toast.success('提交成功')
+        } else {
+          this.$toast(res.data.Message)
+        }
       }).catch(err => {
         console.log(err)
         this.$toast.clear()
@@ -177,9 +182,8 @@ export default {
         if (res.data.Success) {
           this.totalCount = res.data.count
           this.concatList(res.data.data)
-          if (!this.finished) {
-            this.setPageIndex()
-          }
+          this.setPageIndex()
+          // if (!this.finished) {}
         }
       })
     },
