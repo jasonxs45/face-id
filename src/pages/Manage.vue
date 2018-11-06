@@ -10,14 +10,14 @@
                 <span class="sub-tit">{{item.Sex === '男' ? '先生' : '女士'}}</span>
                 <a :href="'tel:'+item.Mobile" class="tel">{{item.Mobile}}</a>
               </h3>
-              <van-tag plain type="success">{{item.CustProess[0][0]}}</van-tag>
+              <van-tag  v-if="item.CustProess.length>0&&item.CustProess[0].length > 0" plain type="success">{{item.CustProess[0][0]}}</van-tag>
             </van-row>
             <div class="body">
-              <van-row type="flex">
+              <van-row v-if="item.CustHouse" type="flex">
                 <p class="tit">意向房源：</p>
                 <p class="admire">{{item.CustHouse}}</p>
               </van-row>
-              <van-row type="flex"  class="steps-wrapper">
+              <van-row v-if="item.CustProess.length>0&&item.CustProess[0].length > 0" type="flex"  class="steps-wrapper">
                 <div>
                   <p class="tit">客户进度：</p>
                 </div>
@@ -25,7 +25,7 @@
                   <!-- <van-step v-for="(step, index1) in item.CustProess" :key="'step-'+index1">
                     <p class="step-desc">{{step[0]}}<span class="time">{{step[1]}}</span></p>
                   </van-step> -->
-                  <van-step>
+                  <van-step >
                     <p class="step-desc">{{item.CustProess[0][0]}}<span class="time">{{item.CustProess[0][1]}}</span></p>
                   </van-step>
                 </van-steps>
@@ -132,12 +132,16 @@ export default {
       let target = this.list
       target.forEach(item => {
         if (!Array.isArray(item.CustProess)) {
-          item.CustProess = item.CustProess.split(',')
-          item.CustProess = item.CustProess.reverse()
-          item.CustProess = item.CustProess.map(ele => {
-            ele = ele.split('|')
-            return ele
-          })
+          if (item.CustProess === null) {
+            item.CustProess = [[]]
+          } else {
+            item.CustProess = item.CustProess.split(',')
+            item.CustProess = item.CustProess.reverse()
+            item.CustProess = item.CustProess.map(ele => {
+              ele = ele.split('|')
+              return ele
+            })
+          }
         }
       })
       return target

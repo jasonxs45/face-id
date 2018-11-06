@@ -3,7 +3,7 @@ import qs from 'qs'
 const BASE_URL = '/WebServer/FaceInterface.aspx'
 const MOCK_URL = 'https://www.easy-mock.com/mock/5bc99756a53e086f8af484c2/faceid'
 axios.defaults.retry = 4
-axios.defaults.retryDelay = 1000
+axios.defaults.retryDelay = 3000
 axios.interceptors.request.use(function (config) {
   return config
 }, function (error) {

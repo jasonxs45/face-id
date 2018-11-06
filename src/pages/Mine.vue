@@ -15,7 +15,7 @@
             </div>
             <div class="operate-box">
               <van-icon class="icon" name="add-o" @click="showBox(index)"></van-icon>
-              <a class="text">来访记录</a>
+              <a class="text" @click="checkRecord(index)">来访记录</a>
             </div>
           </van-row>
         </div>
@@ -42,13 +42,27 @@
         </div>
       </div>
     </van-popup>
+    <van-dialog v-model="recordShow">
+      <div class="record-wrapper">
+        <h3 class="title">来访记录</h3>
+        <div class="content">
+          <template v-if="recordList.length > 0">
+            <van-row v-for="(item, index) in recordList" :key="'rl-'+index" type="flex" justify="space-between" class="record">
+              <van-col class="text">{{item.text}}</van-col>
+              <van-col class="time">{{item.date}}</van-col>
+            </van-row>
+          </template>
+          <div v-else class="norecord">暂无记录！</div>
+        </div>
+      </div>
+    </van-dialog>
   </div>
 </template>
 <script>
 import api from 'common/api'
 import Vue from 'vue'
-import { PullRefresh, List, Lazyload, Row, Icon, Tag, Popup, Button, Field } from 'vant'
-Vue.use(PullRefresh).use(List).use(Lazyload).use(Row).use(Icon).use(Tag).use(Popup).use(Button).use(Field)
+import { PullRefresh, List, Lazyload, Row, Col, Icon, Tag, Popup, Button, Field, Dialog } from 'vant'
+Vue.use(PullRefresh).use(List).use(Lazyload).use(Row).use(Col).use(Icon).use(Tag).use(Popup).use(Button).use(Field).use(Dialog)
 export default {
   name: 'Mine',
   data () {
@@ -65,7 +79,9 @@ export default {
         maxHeight: 200
       },
       list: [],
-      pageIndex: 0
+      pageIndex: 0,
+      recordShow: false,
+      recordList: []
     }
   },
   computed: {
@@ -120,6 +136,9 @@ export default {
             this.totalCount = res.data.count
             this.list = this.list.concat(res.data.data)
           }
+        }).catch(err => {
+          console.log(err)
+          this.$toast('网络错误，请稍后重试！')
         })
       }
     },
@@ -130,6 +149,33 @@ export default {
         if (res.data.Success) {
           this.list = res.data.data
         }
+      })
+    },
+    checkRecord (index) {
+      this.recordList = []
+      this.$toast.loading({
+        message: '加载中'
+      })
+      let id = this.list[index].ID
+      api.fetch({
+        work: 'getcust',
+        id
+      }).then(res => {
+        this.$toast.clear()
+        if (res.data.Success) {
+          this.recordList = res.data.Data.map(item => {
+            let arr = item.split('|')
+            item = {
+              text: arr[0],
+              date: arr[1]
+            }
+            return item
+          })
+          this.recordShow = true
+        }
+      }).catch(err => {
+        this.$toast.clear()
+        console.log(err)
       })
     }
   },
@@ -223,6 +269,39 @@ export default {
     font-size: rpx(36);
     text-align: center;
     margin: rpx(30) 0;
+  }
+}
+.record-wrapper{
+  padding: rpx(20);
+  min-height: rpx(300);
+  .title{
+    text-align: center;
+    font-size: rpx(30);
+    color: #555;
+    padding: rpx(20) 0;
+  }
+  .content{
+    padding: rpx(10);
+  }
+  .record{
+    font-size: rpx(26);
+    color: #333;
+    margin: rpx(40) 0 0;
+    line-height: 1.5;
+    .text{
+      margin-right: rpx(10);
+    }
+    .time{
+      width: rpx(240);
+      flex: 0 0 rpx(240);
+    }
+  }
+  .norecord{
+    font-size: rpx(36);
+    text-align: center;
+    margin: rpx(50) 0;
+    color: #666;
+    font-weight: 200;
   }
 }
 </style>

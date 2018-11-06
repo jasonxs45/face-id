@@ -449,6 +449,7 @@ export default {
 .bar-pie-chart{
   width: 100%;
   height: rpx(480);
+  margin-top: rpx(30);
 }
 .date-change{
   font-size: rpx(24);

@@ -154,12 +154,13 @@ export default {
       }).then(res => {
         this.submiting = false
         if (res.data.Success) {
-          this.$toast.success('提交成功')
+          this.$toast.success('注册成功！')
         } else {
           this.$toast(res.data.Message)
         }
       }).catch(err => {
         console.log(err)
+        this.submiting = false
         this.$toast.clear()
         this.$toast('网络错误，请稍后重试')
       })
@@ -180,6 +181,9 @@ export default {
             this.totalCount = res.data.count
             this.list = this.list.concat(res.data.data)
           }
+        }).catch(err => {
+          console.log(err)
+          this.$toast('网络错误，请稍后重试！')
         })
       }
     },
@@ -258,6 +262,7 @@ export default {
     .radio{
       display: inline-block;
       margin-left: rpx(20);
+      font-size: rpx(28);
     }
     .x-radio{
       position: relative;
