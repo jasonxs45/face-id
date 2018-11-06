@@ -2,48 +2,60 @@
   <div class="statistic">
     <h3 class="title">昨日概况</h3>
       <van-row class="general">
-        <van-col class="column" span="6">
+        <van-col class="column" span="8">
           <p class="title">访问人数</p>
-          <p class="total">1123</p>
-          <p class="day positive">日：{{num}}<van-icon name="upgrade"></van-icon></p>
-          <p class="week negative">周：{{num}}<van-icon name="upgrade"></van-icon></p>
-          <p class="month negative">月：{{num}}<van-icon name="upgrade"></van-icon></p>
+          <p class="total">{{yesterData[0]}}</p>
+          <p class="day positive">日：{{this.dp.SumPercent}}</p>
+          <p class="week negative">周：{{this.wp.SumPercent}}</p>
+          <p class="month negative">月：{{this.mp.SumPercent}}</p>
         </van-col>
-        <van-col class="column van-hairline--left" span="6">
+        <van-col class="column van-hairline--left" span="8">
           <p class="title">新访问人数</p>
-          <p class="total">123</p>
-          <p class="day positive">日：{{num}}<van-icon name="upgrade"></van-icon></p>
-          <p class="week negative">周：{{num}}<van-icon name="upgrade"></van-icon></p>
-          <p class="month negative">月：{{num}}<van-icon name="upgrade"></van-icon></p>
+          <p class="total">{{yesterData[1]}}</p>
+          <p class="day positive">日：{{this.dp.NewPercent}}</p>
+          <p class="week negative">周：{{this.wp.NewPercent}}</p>
+          <p class="month negative">月：{{this.mp.NewPercent}}</p>
         </van-col>
-        <van-col class="column van-hairline--left" span="6">
-          <p class="title">总添加人数</p>
-          <p class="total">567</p>
-          <p class="day positive">日：{{num}}<van-icon name="upgrade"></van-icon></p>
-          <p class="week negative">周：{{num}}<van-icon name="upgrade"></van-icon></p>
-          <p class="month negative">月：{{num}}<van-icon name="upgrade"></van-icon></p>
-        </van-col>
-        <van-col class="column van-hairline--left" span="6">
+        <van-col class="column van-hairline--left" span="8">
           <p class="title">新添加人数</p>
-          <p class="total">23</p>
-          <p class="day positive">日：{{num}}<van-icon name="upgrade"></van-icon></p>
-          <p class="week negative">周：{{num}}<van-icon name="upgrade"></van-icon></p>
-          <p class="month negative">月：{{num}}<van-icon name="upgrade"></van-icon></p>
+          <p class="total">{{yesterData[2]}}</p>
+          <p class="day positive">日：{{this.dp.NewAddPercent}}</p>
+          <p class="week negative">周：{{this.wp.NewAddPercent}}</p>
+          <p class="month negative">月：{{this.mp.NewAddPercent}}</p>
         </van-col>
       </van-row>
     <h3 class="title">今日趋势</h3>
     <div class="line-chart" ref="lineChart"></div>
-    <h3 class="title">访客特征</h3>
-    <div>日期范围</div>
-    <div><span>年龄</span><span>性别</span></div>
+    <h3 class="title">访客构成</h3>
+    <div class="bar-pie-chart" ref="barPieChart"></div>
   </div>
 </template>
 <script>
+import api from 'common/api'
+import { formatNumber } from 'common/utils/formatNumber'
 import Vue from 'vue'
 import { Row, Col, Icon } from 'vant'
 Vue.use(Row).use(Col).use(Icon)
+const color = [
+  '#3699d9',
+  '#f28227',
+  '#c23531',
+  '#2f4554',
+  '#61a0a8',
+  '#d48265',
+  '#91c7ae',
+  '#749f83',
+  '#ca8622',
+  '#bda29a',
+  '#6e7074',
+  '#546570',
+  '#c4ccd3',
+  '#CDB5CD'
+]
 const echarts = require('echarts/lib/echarts')
 require('echarts/lib/chart/line')
+require('echarts/lib/chart/bar')
+require('echarts/lib/chart/pie')
 require('echarts/lib/component/tooltip')
 require('echarts/lib/component/legend')
 require('echarts/lib/component/grid')
@@ -52,17 +64,84 @@ export default {
   name: 'Statistic',
   data () {
     return {
-      num: 2
+      num: 2,
+      starttime: '2018/10/10',
+      endtime: '2018/11/06',
+      yesterData: [],
+      dp: {},
+      wp: {},
+      mp: {},
+      yesterdayLineData: [],
+      todayLineData: [],
+      pieData: []
     }
   },
   computed: {
     lineChart () {
       return echarts.init(this.$refs.lineChart)
+    },
+    barPieChart () {
+      return echarts.init(this.$refs.barPieChart)
     }
   },
   methods: {
+    _getlastdata () {
+      return api.fetch({
+        work: 'getlastdata'
+      })
+    },
+    _getdata () {
+      return api.fetch({
+        work: 'getdata'
+      })
+    },
+    _getpercent () {
+      return api.fetch({
+        work: 'getpercent'
+      })
+    },
+    _getdatabytime () {
+      return api.fetch({
+        work: 'getdatabytime',
+        starttime: this.starttime,
+        endtime: this.endtime
+      })
+    },
+    totalQueries () {
+      this.$toast.loading({
+        duration: 0,
+        message: '加载中'
+      })
+      Promise.all([this._getlastdata(), this._getdata(), this._getpercent(), this._getdatabytime()]).then(res => {
+        this.$toast.clear()
+        this.yesterData = [res[0].data.NewCount, res[0].data.NewAddCount, res[0].data.SumCount]
+        this.dp = res[2].data.DayPercent
+        this.wp = res[2].data.WeekPercent
+        this.mp = res[2].data.MountPercent
+        // 线图
+        this.yesterdayLineData = res[1].data.LastData
+        this.todayLineData = res[1].data.NowData
+        this.initLineChart()
+        // 柱状图饼图
+        this.pieData = [
+          {
+            name: '注册',
+            value: res[3].data.CustCount
+          },
+          {
+            name: '未注册',
+            value: res[3].data.NoLoginCount
+          }
+        ]
+        this.initBarPieChart()
+      }).catch(err => {
+        console.log(err)
+        this.$toast.clear()
+      })
+    },
     initLineChart () {
       let option = {
+        color,
         grid: {
           bottom: 60
         },
@@ -77,7 +156,7 @@ export default {
           }
         },
         legend: {
-          data: ['降雨量', '降雨量1'],
+          data: ['昨天', '今天'],
           x: 'center'
         },
         dataZoom: [
@@ -120,34 +199,121 @@ export default {
           }
         ],
         yAxis: {
-          name: '降雨量',
+          name: '人数',
           nameLocation: 'end',
           type: 'value'
         },
         series: [
           {
-            name: '降雨量',
+            name: '昨天',
             type: 'line',
             animation: false,
-            smooth: true,
             areaStyle: {},
-            data: [6, 5, 1, 3, 2, 2]
+            data: this.yesterdayLineData
           },
           {
-            name: '降雨量1',
+            name: '今天',
             type: 'line',
             animation: false,
-            smooth: true,
             areaStyle: {},
-            data: [1, 2, 4, 5, 5, 6, 5, 4, 3, 2, 1, 3, 2, 1, 4, 5, 6, 5, 2, 3, 2, 2]
+            data: this.todayLineData
           }
         ]
       }
       this.lineChart.setOption(option)
+    },
+    initBarPieChart () {
+      let itemStyle = {
+        emphasis: {
+          shadowBlur: 10,
+          shadowColor: 'rgba(0, 0, 0, 0.2)'
+        }
+      }
+      let labelLine = {
+        normal: {
+          show: false
+        }
+      }
+      let label = {
+        normal: {
+          position: 'inside',
+          formatter (params) {
+            console.log(params)
+            return params.name + ' ' + params.percent.toFixed(0) + '%'
+          }
+        }
+      }
+      let option = {
+        color,
+        // grid: {
+        //   bottom: 50,
+        //   width: '35%'
+        // },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'line',
+            animation: false,
+            label: {
+              backgroundColor: '#505765'
+            }
+          }
+        },
+        legend: {
+          data: ['昨天', '今天'],
+          x: 'center'
+        },
+        // xAxis: [
+        //   {
+        //     type: 'category',
+        //     boundaryGap: 3,
+        //     data: ['注册', '未注册']
+        //   }
+        // ],
+        // yAxis: {
+        //   name: '人数',
+        //   nameLocation: 'end',
+        //   type: 'value'
+        // },
+        series: [
+          // {
+          //   name: '注册',
+          //   type: 'bar',
+          //   animation: false,
+          //   data: [this.pieData[0].value, 0]
+          // },
+          // {
+          //   name: '未注册',
+          //   type: 'bar',
+          //   animation: false,
+          //   data: [0, this.pieData[1].value]
+          // },
+          {
+            name: '构成比率',
+            type: 'pie',
+            radius: 70,
+            // center: ['75%', 120],
+            data: this.pieData,
+            itemStyle,
+            label,
+            labelLine,
+            tooltip: {
+              formatter (params) {
+                return `${params.seriesName}<br/>
+                        ${params.marker + params.name}:${formatNumber(params.value, 0, 1)}<br/>
+                        ${params.percent ? '占比:' + params.percent.toFixed(0) + '%' : ''}`
+              }
+            }
+          }
+        ]
+      }
+      this.barPieChart.setOption(option)
     }
   },
+  created () {
+    this.totalQueries()
+  },
   mounted () {
-    this.initLineChart()
   }
 }
 </script>
@@ -188,7 +354,11 @@ export default {
   }
 }
 .line-chart{
-  width: rpx(690);
+  width: 100%;
+  height: rpx(480);
+}
+.bar-pie-chart{
+  width: 100%;
   height: rpx(480);
 }
 </style>

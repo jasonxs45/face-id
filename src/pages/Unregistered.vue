@@ -142,7 +142,6 @@ export default {
       }
       this.submiting = true
       this.$toast.loading({
-        mask: true,
         message: '提交中',
         duration: 0
       })

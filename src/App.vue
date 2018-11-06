@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div id="nav">
+    <div v-if="$route.name !== 'update'" id="nav">
       <router-link
         v-for="(item, index) in menus"
         :key="'menu-'+index"
