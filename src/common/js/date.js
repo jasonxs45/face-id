@@ -38,27 +38,27 @@ function transferWeek (n) {
   switch (n) {
     case 0:
       txt = '日'
-      break;
+      break
     case 1:
       txt = '一'
-      break;
+      break
     case 2:
       txt = '二'
-      break;
+      break
     case 3:
       txt = '三'
-      break;
+      break
     case 4:
       txt = '四'
-      break;
+      break
     case 5:
       txt = '五'
-      break;
+      break
     case 6:
       txt = '六'
-      break;
+      break
   }
-  return txt;
+  return txt
 }
 export {
   formatDate,
