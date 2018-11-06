@@ -100,8 +100,6 @@
 </template>
 <script>
 import api from 'common/api'
-import cloneDeep from 'clone-deep'
-import { mapState, mapMutations, mapActions } from 'vuex'
 import Vue from 'vue'
 import { PullRefresh, List, Row, Col, Panel, Tag, Step, Steps, Button, Popup, Field } from 'vant'
 Vue.use(PullRefresh).use(List).use(Row).use(Col).use(Panel).use(Tag).use(Step).use(Steps).use(Button).use(Popup).use(Field)
@@ -112,6 +110,8 @@ export default {
       refreshing: false,
       loading: false,
       totalCount: 0,
+      list: [],
+      pageIndex: 0,
       show: false,
       bakinfo: '',
       state: '',
@@ -125,22 +125,20 @@ export default {
     }
   },
   computed: {
-    ...mapState('mine', [
-      'list',
-      'pageIndex'
-    ]),
     finished () {
       return Boolean(this.totalCount) && (this.list.length >= this.totalCount)
     },
     transedList () {
-      let target = cloneDeep(this.list)
+      let target = this.list
       target.forEach(item => {
-        item.CustProess = item.CustProess.split(',')
-        item.CustProess = item.CustProess.reverse()
-        item.CustProess = item.CustProess.map(ele => {
-          ele = ele.split('|')
-          return ele
-        })
+        if (!Array.isArray(item.CustProess)) {
+          item.CustProess = item.CustProess.split(',')
+          item.CustProess = item.CustProess.reverse()
+          item.CustProess = item.CustProess.map(ele => {
+            ele = ele.split('|')
+            return ele
+          })
+        }
       })
       return target
     },
@@ -149,15 +147,6 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('mine', [
-      'resetList',
-      'concatList',
-      'updateListItem',
-      'setPageIndex'
-    ]),
-    ...mapActions('mine', [
-      'load'
-    ]),
     showBox (index) {
       this.show = true
       this.targetIndex = index
@@ -166,6 +155,13 @@ export default {
     },
     hideBox () {
       this.show = false
+    },
+    load () {
+      return api.fetch({
+        work: 'getcustinfo',
+        pagesize: 15,
+        indexpage: this.pageIndex
+      })
     },
     submit () {
       if (!this.state) {
@@ -188,8 +184,6 @@ export default {
         this.submiting = false
         if (res.data.Success) {
           this.$toast.success('更新成功！')
-          // 修改vuex中的原始数据
-          this.updateListItem(res.data.Data)
           this.show = false
           // 前台修改数据
           res.data.Data.CustProess = res.data.Data.CustProess.split(',')
@@ -210,31 +204,26 @@ export default {
       })
     },
     onLoad () {
-      this.load().then(res => {
-        this.loading = false
-        if (res.data.Success) {
-          this.totalCount = res.data.count
-          this.concatList(res.data.data)
-          this.setPageIndex()
-          // if (!this.finished) {}
-        }
-      })
+      if (!this.finished) {
+        this.pageIndex += 1
+        this.load().then(res => {
+          this.loading = false
+          if (res.data.Success) {
+            this.totalCount = res.data.count
+            this.list = this.list.concat(res.data.data)
+          }
+        })
+      }
     },
     onRefresh () {
-      this.setPageIndex('reset')
+      this.pageIndex = 1
       this.load().then(res => {
         this.refreshing = false
         if (res.data.Success) {
-          this.resetList(res.data.data)
-          if (!this.finished) {
-            this.setPageIndex()
-          }
+          this.list = res.data.data
         }
       })
     }
-  },
-  destroyed () {
-
   }
 }
 </script>
@@ -393,6 +382,7 @@ export default {
   }
   .btns{
     position: fixed;
+    z-index: 2;
     width: 100%;
     bottom: 0;
     left: 0;

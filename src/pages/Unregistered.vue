@@ -64,7 +64,6 @@ import api from 'common/api'
 import { formatDate } from 'common/utils/date'
 import { NAME_REG, TEL_REG } from 'common/utils/reg'
 import Vue from 'vue'
-import { mapState, mapMutations, mapActions } from 'vuex'
 import { PullRefresh, List, Row, Icon, Popup, Field, Button, Radio, RadioGroup, Lazyload } from 'vant'
 Vue.use(PullRefresh).use(List).use(Row).use(Icon).use(Popup).use(Button).use(Radio).use(RadioGroup).use(Field).use(Lazyload)
 export default {
@@ -75,6 +74,8 @@ export default {
       loading: false,
       totalCount: 0,
       show: false,
+      list: [],
+      pageIndex: 0,
       role: {
         avatar: '',
         guid: '',
@@ -93,10 +94,6 @@ export default {
     }
   },
   computed: {
-    ...mapState('unregistered', [
-      'list',
-      'pageIndex'
-    ]),
     finished () {
       return Boolean(this.totalCount) && (this.list.length >= this.totalCount)
     },
@@ -167,41 +164,38 @@ export default {
         this.$toast('网络错误，请稍后重试')
       })
     },
-    ...mapMutations('unregistered', [
-      'resetList',
-      'concatList',
-      'setPageIndex'
-    ]),
-    ...mapActions('unregistered', [
-      'load'
-    ]),
-    onLoad () {
-      this.load().then(res => {
-        this.loading = false
-        if (res.data.Success) {
-          this.totalCount = res.data.count
-          this.concatList(res.data.data)
-          this.setPageIndex()
-          // if (!this.finished) {}
-        }
+    load () {
+      return api.fetch({
+        work: 'getfaceimg',
+        pagesize: 14,
+        indexpage: this.pageIndex
       })
     },
+    onLoad () {
+      if (!this.finished) {
+        this.pageIndex += 1
+        this.load().then(res => {
+          this.loading = false
+          if (res.data.Success) {
+            this.totalCount = res.data.count
+            this.list = this.list.concat(res.data.data)
+          }
+        })
+      }
+    },
     onRefresh () {
-      this.setPageIndex('reset')
+      this.pageIndex = 0
+      this.pageIndex += 1
       this.load().then(res => {
         this.refreshing = false
         if (res.data.Success) {
-          this.resetList(res.data.data)
-          if (!this.finished) {
-            this.setPageIndex()
-          }
+          this.list = res.data.data
         }
       })
     }
   },
-  created () {
-    // this.fetchList()
-    // this.concatList()
+  activated () {
+    console.log('unregistered active')
   }
 }
 </script>

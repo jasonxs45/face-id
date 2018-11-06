@@ -238,61 +238,75 @@ export default {
         normal: {
           position: 'inside',
           formatter (params) {
-            console.log(params)
             return params.name + ' ' + params.percent.toFixed(0) + '%'
           }
         }
       }
       let option = {
         color,
-        // grid: {
-        //   bottom: 50,
-        //   width: '35%'
-        // },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'line',
-            animation: false,
-            label: {
-              backgroundColor: '#505765'
+        grid: {
+          bottom: 50,
+          width: '40%',
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
             }
           }
         },
+        tooltip: {
+          formatter (params) {
+            let title = '访客构成'
+            let subTitle = params[0].axisValue
+            let para = ''
+            for (let i = 0; i < params.length; i++) {
+              para += `${params[i].marker + params[i].seriesName}：${formatNumber(params[i].value, 0, 1)}<br/>`
+            }
+            return `${title}<br/>${subTitle}<br/>${para}`
+          }
+        },
         legend: {
-          data: ['昨天', '今天'],
+          data: ['注册', '未注册'],
           x: 'center'
         },
-        // xAxis: [
-        //   {
-        //     type: 'category',
-        //     boundaryGap: 3,
-        //     data: ['注册', '未注册']
-        //   }
-        // ],
-        // yAxis: {
-        //   name: '人数',
-        //   nameLocation: 'end',
-        //   type: 'value'
-        // },
+        xAxis: [
+          {
+            type: 'category',
+            data: ['注册', '未注册']
+          }
+        ],
+        yAxis: {
+          name: '人数',
+          nameLocation: 'end',
+          type: 'value'
+        },
         series: [
-          // {
-          //   name: '注册',
-          //   type: 'bar',
-          //   animation: false,
-          //   data: [this.pieData[0].value, 0]
-          // },
-          // {
-          //   name: '未注册',
-          //   type: 'bar',
-          //   animation: false,
-          //   data: [0, this.pieData[1].value]
-          // },
+          {
+            name: '构成比例',
+            type: 'bar',
+            animation: false,
+            data: [
+              {
+                name: '注册',
+                value: this.pieData[0].value,
+                itemStyle: {
+                  color: color[0]
+                }
+              },
+              {
+                name: '未注册',
+                value: this.pieData[1].value,
+                itemStyle: {
+                  color: color[1]
+                }
+              }
+            ]
+          },
           {
             name: '构成比率',
             type: 'pie',
             radius: 70,
-            // center: ['75%', 120],
+            center: ['75%', 120],
             data: this.pieData,
             itemStyle,
             label,

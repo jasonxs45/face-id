@@ -12,7 +12,9 @@
       </router-link>
     </div>
     <div class="content">
-      <router-view/>
+      <keep-alive>
+        <router-view/>
+      </keep-alive>
     </div>
   </div>
 </template>
@@ -25,13 +27,11 @@ export default {
       tabs: [
         {
           text: '我的',
-          path: '/home/mine',
-          todos: [1, 2, 3]
+          path: '/home/mine'
         },
         {
           text: '未注册',
-          path: '/home/unregistered',
-          todos: [1, 2, 3]
+          path: '/home/unregistered'
         }
       ]
     }

@@ -1,34 +1,7 @@
-import api from 'common/api'
-const state = {
-  list: [],
-  pageIndex: 1
-}
+const state = {}
 const getters = {}
-const mutations = {
-  resetList (state, newVal = []) {
-    state.list = newVal
-  },
-  concatList (state, newVal = []) {
-    state.list = state.list.concat(newVal)
-  },
-  setPageIndex (state, type = undefined) {
-    if (type === undefined) {
-      state.pageIndex += 1
-    }
-    if (type === 'reset') {
-      state.pageIndex = 1
-    }
-  }
-}
-const actions = {
-  load ({ state, commit }) {
-    return api.fetch({
-      work: 'getfaceimg',
-      pagesize: 15,
-      indexpage: state.pageIndex
-    })
-  }
-}
+const mutations = {}
+const actions = {}
 export default {
   namespaced: true,
   state,

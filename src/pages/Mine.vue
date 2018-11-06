@@ -47,7 +47,6 @@
 <script>
 import api from 'common/api'
 import Vue from 'vue'
-import { mapState, mapMutations, mapActions } from 'vuex'
 import { PullRefresh, List, Lazyload, Row, Icon, Tag, Popup, Button, Field } from 'vant'
 Vue.use(PullRefresh).use(List).use(Lazyload).use(Row).use(Icon).use(Tag).use(Popup).use(Button).use(Field)
 export default {
@@ -64,20 +63,15 @@ export default {
       autosize: {
         minHeight: 50,
         maxHeight: 200
-      }
+      },
+      list: [],
+      pageIndex: 0
     }
   },
   computed: {
-    ...mapState('mine', [
-      'list',
-      'pageIndex'
-    ]),
     finished () {
       return Boolean(this.totalCount) && (this.list.length >= this.totalCount)
     }
-  },
-  created () {
-    // this.fetchList()
   },
   methods: {
     showBox (index) {
@@ -110,37 +104,37 @@ export default {
         this.$toast('网络错误，请稍后重试')
       })
     },
-    ...mapMutations('mine', [
-      'resetList',
-      'concatList',
-      'setPageIndex'
-    ]),
-    ...mapActions('mine', [
-      'load'
-    ]),
-    onLoad () {
-      this.load().then(res => {
-        this.loading = false
-        if (res.data.Success) {
-          this.totalCount = res.data.count
-          this.concatList(res.data.data)
-          this.setPageIndex()
-          // if (!this.finished) {}
-        }
+    load () {
+      return api.fetch({
+        work: 'getcustinfo',
+        pagesize: 15,
+        indexpage: this.pageIndex
       })
     },
+    onLoad () {
+      if (!this.finished) {
+        this.pageIndex += 1
+        this.load().then(res => {
+          this.loading = false
+          if (res.data.Success) {
+            this.totalCount = res.data.count
+            this.list = this.list.concat(res.data.data)
+          }
+        })
+      }
+    },
     onRefresh () {
-      this.setPageIndex('reset')
+      this.pageIndex = 1
       this.load().then(res => {
         this.refreshing = false
         if (res.data.Success) {
-          this.resetList(res.data.data)
-          if (!this.finished) {
-            this.setPageIndex()
-          }
+          this.list = res.data.data
         }
       })
     }
+  },
+  activated () {
+    console.log('mine actived')
   }
 }
 </script>

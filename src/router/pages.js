@@ -30,11 +30,6 @@ const routes = [
     component: () => import('pages/Manage.vue')
   },
   {
-    path: '/update/:index',
-    name: 'update',
-    component: () => import('pages/Update.vue')
-  },
-  {
     path: '/statistic',
     name: 'statistic',
     component: () => import('pages/Statistic.vue')
